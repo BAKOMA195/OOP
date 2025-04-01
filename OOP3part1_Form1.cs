@@ -1,8 +1,8 @@
-при зажатии ctrl по клику левой кнопкой должны выделятся сразу несколько кругов, только я могу выделить 2, 3 и т,д в моем коде почему я не могу выделить больше 1 объекта
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace OOP3part1
 {
@@ -63,29 +63,34 @@ namespace OOP3part1
             {
                 bool found = false; // Флаг, был ли клик по кругу
                 bool ctrlPressed = ModifierKeys.HasFlag(Keys.Control); // Проверяем, зажат ли Ctrl
+                bool ctrlAndLeftMousePressed = ModifierKeys.HasFlag(Keys.Control) && e.Button == MouseButtons.Left;
 
                 foreach (var circle in circles)
                 {
                     if (circle.ContainsPoint(e.X, e.Y))
                     {
                         found = true;
-                        if (ctrlPressed)
+                        if (!ctrlAndLeftMousePressed)
                         {
                             circle.IsSelected = !circle.IsSelected; // Переключаем выделение
                         }
-                        else
+                        if (ctrlAndLeftMousePressed)
                         {
                             circle.IsSelected = true; // Обычное выделение
                         }
+                        if (!ctrlPressed)
+                        {
+                            circle.IsSelected = true;
+                        }
                     }
-                    else if (!ctrlPressed) // Если Ctrl не зажат - снимаем выделение с остальных
+                    else if (!ctrlAndLeftMousePressed) // Если Ctrl не зажат - снимаем выделение с остальных
                     {
                         circle.IsSelected = false;
                     }
                 }
 
                 // Если кликнули на пустое место без Ctrl, снимаем выделение со всех
-                if (!found && !ctrlPressed)
+                if (!found && !ctrlAndLeftMousePressed)
                 {
                     foreach (var circle in circles)
                     {
