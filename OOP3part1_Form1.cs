@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using static OOP3part1.Form1;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace OOP3part1
 {
     public partial class Form1 : Form
     {
-        private List<CCircle> circles = new List<CCircle>(); // Список кругов
+        private MyStorage<CCircle> circles = new MyStorage<CCircle>(); // Используем контейнер
 
         public Form1()
         {
@@ -21,7 +22,6 @@ namespace OOP3part1
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
         }
 
         public class CCircle
@@ -114,9 +114,29 @@ namespace OOP3part1
         {
             if (e.KeyCode == Keys.Delete) // Удаление выделенных кругов
             {
-                circles.RemoveAll(c => c.IsSelected);
+                circles.RemoveSelected();
                 this.Invalidate();
             }
+        }
+    }
+
+    public class MyStorage<T>
+    {
+        private List<T> items = new List<T>();
+
+        public void Add(T item)
+        {
+            items.Add(item);
+        }
+
+        public void RemoveSelected()
+        {
+            items.RemoveAll(item => (item as CCircle)?.IsSelected ?? false);
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return items.GetEnumerator();
         }
     }
 }
