@@ -341,21 +341,6 @@ int main() {
             point.print();
             cout << endl;
 
-            // Создание объекта класса Circle
-            Circle circle(30, 40, 5.5);
-            circle.print();
-            cout << endl;
-
-            // Создание объекта класса Rectangle
-            Rectangle rectangle(5, 5, 25, 25);
-            rectangle.print();
-            cout << endl;
-
-            // Создание объекта класса RectanglePtr
-            RectanglePtr rectanglePtr(0, 0, 10, 10);
-            rectanglePtr.print();
-            cout << endl;
-
             break;
 
         }
@@ -364,31 +349,12 @@ int main() {
 
             cout << "Динамическое создание объектов" << endl << endl;
 
-            // Динамическое создание объекта класса Point
-            Point* point = new Point(10, 20);
-            point->print();
-            cout << endl;
-
             // Динамическое создание объекта класса Circle
             Circle* circle = new Circle(30, 40, 5.5);
             circle->print();
             cout << endl;
 
-            // Динамическое создание объекта класса Rectangle
-            Rectangle* rectangle = new Rectangle(5, 5, 25, 25);
-            rectangle->print();
-            cout << endl;
-
-            // Динамическое создание объекта класса RectanglePtr
-            RectanglePtr* rectanglePtr = new RectanglePtr(0, 0, 10, 10);
-            rectanglePtr->print();
-            cout << endl;
-
-            // Освобождение памяти
-            delete point;
             delete circle;
-            delete rectangle;
-            delete rectanglePtr;
 
             break;
 
@@ -398,20 +364,6 @@ int main() {
 
             cout << "Присваивание значения объектов" << endl << endl;
 
-            // Point
-            Point point1; // Создаем объект по умолчанию
-            Point point2(10, 20); // Создаем временный объект
-            point1 = point2; // Присваиваем значение
-            point1.print();
-            cout << endl;
-
-            // Circle
-            Circle circle1; // Создаем объект по умолчанию
-            Circle circle2(30, 40, 5.5); // Создаем временный объект
-            circle1 = circle2; // Присваиваем значение
-            circle1.print();
-            cout << endl;
-
             // Rectangle
             Rectangle rectangle1(0, 0, 1, 1); // Создаем объект с временными значениями
             Rectangle rectangle2(5, 5, 25, 25); // Создаем временный объект
@@ -419,19 +371,12 @@ int main() {
             rectangle1.print();
             cout << endl;
 
-            // RectanglePtr
-            RectanglePtr rectanglePtr1(0, 0, 1, 1); // Создаем объект с временными значениями
-            RectanglePtr rectanglePtr2(0, 0, 10, 10); // Создаем временный объект
-            rectanglePtr1 = rectanglePtr2; // Присваиваем значение
-            rectanglePtr1.print();
-            cout << endl;
-
             break;
         }
 
         case 4: {
 
-            cout << "Наследование и полиморфизм объектов" << endl << endl;
+            cout << "Полиморфизм объектов" << endl << endl;
 
 
             // Указатель на базовый класс указывает на объект производного класса
@@ -450,24 +395,6 @@ int main() {
         case 5: {
 
             cout << "Конструктор копирования объектов" << endl << endl;
-
-            Point p1(8, 12);
-            Point p2 = p1;  // Использование конструктора копирования
-            p1.print();
-            p2.print();
-            cout << endl;
-
-            Circle c1(1, 2, 3.0); 
-            Circle c2 = c1; // Использование конструктора копирования
-            c1.print();
-            c2.print();
-            cout << endl;
-
-            Rectangle r1(0, 0, 5, 5); 
-            Rectangle r2 = r1; // Использование конструктора копирования
-            r1.print();
-            r2.print();
-            cout << endl;
 
             RectanglePtr rp1(1, 2, 3, 4);
             RectanglePtr rp2 = rp1; // Использование конструктора копирования
