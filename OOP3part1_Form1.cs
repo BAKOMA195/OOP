@@ -1,8 +1,8 @@
-using System; // Подключение пространства имен для базовых типов и функционала .NET
-using System.Collections.Generic; // Для работы с коллекциями, такими как List
-using System.Drawing; // Для работы с графикой (например, отрисовка фигур)
-using System.Linq; // Для использования LINQ-запросов
-using System.Windows.Forms; // Для работы с формами и элементами управления WinForms
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace OOP3._1 // Определение пространства имен для проекта
 {
@@ -10,83 +10,94 @@ namespace OOP3._1 // Определение пространства имен д
     {
         private MyStorage storage; // Хранилище всех объектов на форме (кругов)
 
-        // Флаг: true = выделять все круги под курсором; false = только один
-        private bool selectMultipleInOverlap = true; // ← Можешь поменять на false по указанию преподавателя
-
         public Form1() // Конструктор формы
         {
-            InitializeComponent();       // Инициализация компонентов WinForms (автоматически созданных)
-            this.DoubleBuffered = true;  // Включаем двойную буферизацию, чтобы избежать мерцания при перерисовке
-            this.KeyPreview = true;      // Разрешаем форму перехватывать события клавиш (например, Del)
+            InitializeComponent();       
+            //this.DoubleBuffered = true;  // Включаем двойную буферизацию, чтобы избежать мерцания при перерисовке
+            this.KeyPreview = true;      // Разрешаем форме перехватывать события клавиш до элементов управления (например, для Delete)
             storage = new MyStorage();   // Создаём контейнер для хранения кругов
 
             // Подписываемся на события формы
             this.MouseDown += Form1_MouseDown; // Обработка нажатия мыши
             this.Paint += Form1_Paint;         // Обработка перерисовки формы
             this.KeyDown += Form1_KeyDown;     // Обработка нажатия клавиш
-            this.Resize += (s, e) => this.Invalidate(); // Перерисовка при изменении размера формы
+            this.Resize += (s, e) => this.Invalidate(); // Перерисовка при изменении размера формы для корректного отображения
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // Пустой метод загрузки формы (можно добавить дополнительную логику при необходимости)
         }
 
         // Обработка нажатия мыши
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left) // Проверяем, что нажата левая кнопка мыши
+            // Реагируем только на нажатие левой кнопки мыши
+            if (e.Button == MouseButtons.Left)
             {
-                bool ctrl = (ModifierKeys & Keys.Control) == Keys.Control; // Проверяем, нажат ли Ctrl
+                // Проверяем, зажата ли клавиша Ctrl в момент клика
+                bool ctrl = (ModifierKeys & Keys.Control) == Keys.Control;
 
-                if (selectMultipleInOverlap) // Если включен режим множественного выделения
+                // Флаг, показывающий, попали ли мы хотя бы по одному кругу
+                bool hitAny = false;
+
+                // Если Ctrl НЕ нажат, то перед выделением новых кругов нужно снять выделение со всех существующих
+                if (!ctrl)
                 {
-                    bool hitAny = false; // Флаг, указывающий, был ли найден хотя бы один круг под курсором
-                    foreach (var shape in storage.All()) // Проходим по всем фигурам в хранилище
-                    {
-                        if (shape.HitTest(e.Location)) // Проверяем, находится ли курсор над фигурой
-                        {
-                            if (!ctrl)
-                                storage.ClearSelection(); // Если Ctrl не нажат, сбрасываем выделение у всех фигур
-                            shape.ToggleSelect(ctrl);     // Переключаем выделение текущей фигуры
-                            hitAny = true;               // Устанавливаем флаг, что найден хотя бы один круг
-                        }
-                    }
-
-                    // Если ни один круг не попал под курсор — создаём новый
-                    if (!hitAny)
-                    {
-                        if (!ctrl)
-                            storage.ClearSelection(); // Если Ctrl не нажат, сбрасываем выделение
-                        storage.Add(new CCircle(e.Location)); // Добавляем новый круг в хранилище
-                    }
-                }
-                else // Если включен режим одиночного выделения
-                {
-                    storage.SelectAt(e.Location, ctrl); // Выбираем первый круг под курсором
-
-                    // Если ни один круг не попал под курсор — создаём новый
-                    if (!storage.HitAny(e.Location))
-                        storage.Add(new CCircle(e.Location)); // Добавляем новый круг в хранилище
+                    storage.ClearSelection();
                 }
 
-                this.Invalidate(); // Перерисовываем форму для обновления отображения
+                // Проходим по всем кругам в хранилище.
+
+                foreach (var shape in storage.All()/*.Reverse()*/) // <--- УБРАТЬ ЧТОБЫ ВЫДЕЛИТЬ ВЕРХНИЙ
+                {
+                    // Проверяем, находится ли точка клика внутри текущего круга
+                    if (shape.HitTest(e.Location))
+                    {
+                        // Если попали, переключаем состояние выделения этого круга
+                        // Если Ctrl нажат (ctrl == true), выделение инвертируется
+                        // Если Ctrl не нажат (ctrl == false), круг просто выделяется (если не был выделен)
+                        shape.ToggleSelect(ctrl);
+
+                        // Устанавливаем флаг, что мы попали хотя бы по одному кругу
+                        hitAny = true;
+
+
+                        break; // <-- УБРАТЬ ЧТОБЫ ВЫДЕЛИТЬ НЕСКОЛЬКО
+
+
+                    }
+                }
+
+                // Если после проверки всех кругов оказалось, что мы не попали ни по одному
+                if (!hitAny)
+                {
+                    // Если Ctrl не был нажат при клике в пустое место, то выделение уже было сброшено ранее.
+                    // Если Ctrl был нажат, то существующее выделение сохраняется.
+                    // В обоих случаях создаем новый круг в точке клика.
+                    storage.Add(new CCircle(e.Location));
+                }
+
+                // Запрашиваем перерисовку формы, чтобы отобразить изменения (новое выделение или новый круг)
+                this.Invalidate();
             }
         }
 
-        // Отрисовка всех объектов на форме
+        // Отрисовка всех кругов на форме
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            storage.DrawAll(e.Graphics); // Рисуем все круги из хранилища
+            storage.DrawAll(e.Graphics);
         }
 
         // Обработка нажатия клавиш
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Delete) // Если нажата клавиша Delete
+            // Если нажата клавиша Delete
+            if (e.KeyCode == Keys.Delete)
             {
-                storage.RemoveSelected(); // Удаляем все выделенные круги из хранилища
-                this.Invalidate();        // Перерисовываем форму для обновления отображения
+                // Удаляем все выделенные круги из хранилища
+                storage.RemoveSelected();
+                // Запрашиваем перерисовку формы для отображения изменений
+                this.Invalidate();
             }
         }
     }
@@ -96,109 +107,131 @@ namespace OOP3._1 // Определение пространства имен д
     {
         public abstract void Draw(Graphics g);               // Метод для отрисовки фигуры
         public abstract bool HitTest(Point p);               // Метод для проверки попадания точки в фигуру
-        public abstract void ToggleSelect(bool multi);       // Метод для переключения выделения
-        public abstract bool IsSelected { get; }             // Свойство для проверки, выделена ли фигура
+        public abstract void ToggleSelect(bool ctrlPressed); // Метод для переключения выделения
+        public abstract bool IsSelected 
+        { 
+            get;                                             // Свойство для проверки, выделена ли фигура
+        }            
+        public abstract void Deselect();                     // Метод для принудительного снятия выделения
     }
 
-    // Класс круга
+    // Класс круга, наследуется от Shape
     public class CCircle : Shape
     {
-        private const int Radius = 30;       // Радиус круга
-        private Point center;                // Центр круга
-        private bool selected = false;       // Флаг, указывающий, выделен ли круг
+        private const int Radius = 30;       // Радиус для всех кругов
+        private Point center;                // Координаты центра круга
+        private bool selected = false;       // Флаг выделен ли данный круг
 
-        public CCircle(Point center) // Конструктор круга
+        // Конструктор круга
+        public CCircle(Point center)
         {
-            this.center = center;           // Устанавливаем центр круга
+            this.center = center;
+            this.selected = false; // <-- ТРУ ЕСЛИ ХОЧЕШЬ ВЫДЕЛЯТЬ СРАЗУ СОЗДАННЫЙ КРУГ
         }
 
-        public override void Draw(Graphics g) // Отрисовка круга
+        // Метод отрисовки круга
+        public override void Draw(Graphics g)
         {
-            Rectangle rect = new Rectangle(center.X - Radius, center.Y - Radius, Radius * 2, Radius * 2); // Прямоугольник для круга
-            Pen pen = selected ? Pens.Red : Pens.Black; // Определяем цвет пера (красный для выделенных, чёрный для остальных)
+            // Создаем прямоугольник, описывающий круг
 
-            g.DrawEllipse(pen, rect); // Рисуем окружность
+            Rectangle rect = new Rectangle(center.X - Radius, center.Y - Radius, Radius * 2, Radius * 2);
 
-            if (selected) // Если круг выделен, закрашиваем его полупрозрачным красным цветом
-                g.FillEllipse(new SolidBrush(Color.FromArgb(50, Color.Red)), rect);
-        }
+            // Рисования контура: красное для выделенных, черное для остальных
 
-        public override bool HitTest(Point p) // Проверка попадания точки в круг
-        {
-            int dx = p.X - center.X; // Разница по оси X между точкой и центром круга
-            int dy = p.Y - center.Y; // Разница по оси Y между точкой и центром круга
-            return dx * dx + dy * dy <= Radius * Radius; // Проверяем по формуле расстояния до центра
-        }
+            Pen pen = selected ? Pens.Red : Pens.Magenta;
 
-        public override void ToggleSelect(bool multi) // Переключение выделения
-        {
-            if (!multi)
-                selected = true;     // Без Ctrl — всегда выделяем
-            else
-                selected = !selected; // С Ctrl — инвертируем выделение
-        }
+            // Рисуем контур круга (эллипс)
+            g.DrawEllipse(pen, rect);
 
-        public void Deselect() // Сброс выделения
-        {
-            selected = false; // Устанавливаем флаг выделения в false
-        }
-
-        public override bool IsSelected => selected; // Свойство для проверки выделения
-    }
-
-    // Кастомный контейнер фигур
-    public class MyStorage
-    {
-        private List<Shape> shapes = new List<Shape>(); // Список для хранения фигур
-
-        public void Add(Shape shape) => shapes.Add(shape); // Добавление новой фигуры в список
-
-        public void RemoveSelected() // Удаление всех выделенных фигур
-        {
-            shapes = shapes.Where(s => !s.IsSelected).ToList(); // Оставляем только невыделенные фигуры
-        }
-
-        public void ClearSelection() // Снятие выделения со всех фигур
-        {
-            foreach (var shape in shapes)
-                if (shape is CCircle circle)
-                    circle.Deselect(); // Сбрасываем выделение для каждого круга
-        }
-
-        public void SelectAt(Point p, bool ctrl) // Выбор фигуры под курсором
-        {
-            bool anySelected = false; // Флаг, указывающий, была ли выбрана хотя бы одна фигура
-
-            foreach (var shape in shapes) // Проходим по всем фигурам
+            // Если круг выделен, закрашиваем его полупрозрачным красным цветом для наглядности
+            if (selected)
             {
-                if (shape.HitTest(p)) // Если курсор над фигурой
-                {
-                    if (!ctrl)
-                        ClearSelection(); // Если Ctrl не нажат, сбрасываем выделение у всех фигур
-                    shape.ToggleSelect(ctrl); // Переключаем выделение текущей фигуры
-                    anySelected = true; // Устанавливаем флаг, что фигура выбрана
-                    break; // Выбираем только одну фигуру
-                }
+                // Используем цвет с альфа-каналом (50) для полупрозрачности
+                g.FillEllipse(new SolidBrush(Color.FromArgb(50, Color.Red)), rect);
+            }
+        }
+
+        // Реализация метода проверки попадания точки в круг
+        public override bool HitTest(Point p)
+        {
+            // Вычисляем квадраты разностей координат точки клика и центра круга
+            int dx = p.X - center.X;
+            int dy = p.Y - center.Y;
+            // Проверяем по теореме Пифагора: квадрат расстояния от точки до центра должен быть меньше или равен квадрату радиуса
+            return dx * dx + dy * dy <= Radius * Radius;
+        }
+
+        // Реализация метода переключения выделения
+        public override void ToggleSelect(bool ctrlPressed)
+        {
+            // Если Ctrl НЕ был нажат то круг выделяется
+            if (!ctrlPressed)
+            {
+                selected = true;
             }
 
-            if (!anySelected && !ctrl)
-                ClearSelection(); // Если ни одна фигура не выбрана и Ctrl не нажат, сбрасываем выделение
+            // Если Ctrl БЫЛ нажат, то состояние выделения инвертируется
+            else
+            {
+                selected = !selected;
+            }
         }
 
-        public bool HitAny(Point p) // Проверка, есть ли хоть одна фигура под курсором
+        // Реализация метода для снятия выделения
+        public override void Deselect()
         {
-            return shapes.Any(s => s.HitTest(p)); // Возвращаем true, если найдена хотя бы одна фигура
+            selected = false; // Просто устанавливаем флаг выделения в false
         }
 
-        public void DrawAll(Graphics g) // Отрисовка всех фигур
+        public override bool IsSelected => selected;
+    }
+
+    // Контейнер для кругов
+    public class MyStorage
+    {
+        // Список для хранения всех фигур на форме
+        private List<Shape> shapes = new List<Shape>();
+
+        // Метод для добавления новой фигуры в хранилище
+        public void Add(Shape shape) => shapes.Add(shape);
+
+        // Метод для удаления всех выделенных фигур
+        public void RemoveSelected()
         {
+            shapes = shapes.Where(s => !s.IsSelected).ToList();
+        }
+
+        // Метод для снятия выделения со всех фигур в хранилище
+        public void ClearSelection()
+        {
+            // Проходим по всем фигурам и вызываем у каждой метод Deselect()
             foreach (var shape in shapes)
-                shape.Draw(g); // Рисуем каждую фигуру
+            {
+                shape.Deselect(); // Используем новый абстрактный метод Deselect
+            }
         }
 
-        public IEnumerable<Shape> All() // Получение всех фигур из хранилища
+        // Метод для проверки, находится ли хотя бы одна фигура под указанной точкой
+        public bool HitAny(Point p)
         {
-            return shapes; // Возвращаем список фигур
+            return shapes.Any(s => s.HitTest(p));
+        }
+
+        // Метод для отрисовки всех фигур в хранилище
+        public void DrawAll(Graphics g)
+        {
+            // Проходим по всем фигурам и вызываем у каждой метод Draw
+            foreach (var shape in shapes)
+            {
+                shape.Draw(g);
+            }
+        }
+
+        // Метод для получения доступа ко всем фигурам в хранилище
+        public IEnumerable<Shape> All()
+        {
+            // Возвращаем текущий список фигур
+            return shapes;
         }
     }
 }
