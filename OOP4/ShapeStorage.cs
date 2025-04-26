@@ -8,8 +8,7 @@ namespace OOP4
     // Собственный контейнер для хранения фигур
     public class ShapeStorage : IEnumerable<Shape> // Реализуем IEnumerable для foreach
     {
-        // Внутреннее хранилище. Используем List<Shape> для простоты и гибкости.
-        // Оно должно быть приватным согласно заданию.
+        // Внутреннее хранилище List<Shape> 
         private List<Shape> shapes;
 
         // Конструктор
@@ -99,11 +98,11 @@ namespace OOP4
             // foreach (var shape in shapes) { if (shape.IsSelected) shape.Draw(g); } // Выделенные рисуются поверх
         }
 
-        // Метод для получения фигуры по точке (для выбора мышкой)
+        // Метод для получения фигуры по точке
         // Возвращает последнюю (верхнюю) фигуру, содержащую точку
         public Shape GetShapeAt(Point point)
         {
-            // Ищем с конца списка, чтобы найти "верхнюю" фигуру - логика оптимальна для этого случая.
+            // Ищем с конца списка, чтобы найти "верхнюю" фигуру
             for (int i = shapes.Count - 1; i >= 0; i--)
             {
                 if (shapes[i].ContainsPoint(point))
@@ -121,10 +120,8 @@ namespace OOP4
             return shapes.GetEnumerator();
         }
 
-        // Явная реализация нетипизированного IEnumerator для совместимости
         IEnumerator IEnumerable.GetEnumerator()
         {
-            // Стандартная реализация через вызов типизированного GetEnumerator
             return this.GetEnumerator();
         }
     }
