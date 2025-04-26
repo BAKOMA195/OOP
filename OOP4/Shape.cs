@@ -12,7 +12,7 @@ namespace OOP4
         Rectangle,
         Ellipse,
         Triangle,
-        Line // Отрезок
+        Line
     }
 
     // Базовый абстрактный класс для всех фигур
@@ -39,7 +39,7 @@ namespace OOP4
         // Виртуальный метод для проверки попадания точки внутрь фигуры
         public virtual bool ContainsPoint(Point p)
         {
-            // Базовая реализация - проверка попадания в ограничивающий прямоугольник
+            // Проверка попадания в ограничивающий прямоугольник
             return GetBounds().Contains(p);
         }
 
@@ -87,12 +87,11 @@ namespace OOP4
         }
     }
 
-    // Конкретные реализации фигур
+    // Классы-наследники фигур
 
     public class Circle : Shape
     {
-        public Circle(Point center, int radius, Color color)
-            : base(new Point(center.X - radius, center.Y - radius), new Size(radius * 2, radius * 2), color)
+        public Circle(Point center, int radius, Color color): base(new Point(center.X - radius, center.Y - radius), new Size(radius * 2, radius * 2), color)
         { }
 
         public override void Draw(Graphics g)
@@ -128,8 +127,7 @@ namespace OOP4
 
     public class Square : Shape
     {
-        public Square(Point topLeft, int side, Color color)
-            : base(topLeft, new Size(side, side), color)
+        public Square(Point topLeft, int side, Color color) : base(topLeft, new Size(side, side), color)
         { }
 
         public override void Draw(Graphics g)
@@ -148,14 +146,13 @@ namespace OOP4
             int delta = Math.Max(dw, dh);
             int newSide = Math.Max(1, ShapeSize.Width + delta);
             ShapeSize = new Size(newSide, newSide);
-            // Position не меняем, т.к. растет от верхнего левого угла
+            // Position не меняем растет от верхнего левого угла
         }
     }
 
     public class RectangleShape : Shape
     {
-        public RectangleShape(Point topLeft, Size size, Color color)
-            : base(topLeft, size, color)
+        public RectangleShape(Point topLeft, Size size, Color color) : base(topLeft, size, color)
         { }
 
         public override void Draw(Graphics g)
@@ -172,8 +169,7 @@ namespace OOP4
 
     public class Ellipse : Shape
     {
-        public Ellipse(Point topLeft, Size size, Color color)
-            : base(topLeft, size, color)
+        public Ellipse(Point topLeft, Size size, Color color) : base(topLeft, size, color)
         { }
 
         public override void Draw(Graphics g)
@@ -252,7 +248,7 @@ namespace OOP4
 
             // Вычисляем коэффициент масштабирования
             // Сохраняем пропорции, используя большее из изменений (dw, dh)
-            int currentSizeApprox = Math.Max(1, ShapeSize.Width); // Убрано this.
+            int currentSizeApprox = Math.Max(1, ShapeSize.Width);
             int delta = Math.Max(dw, dh); // Насколько хотим изменить размер
             int newSizeApprox = currentSizeApprox + delta; // Новый предполагаемый размер
 
@@ -265,9 +261,8 @@ namespace OOP4
                 {
                     newSizeApprox = minTriangleSize;
                 }
-                else // Если пытаемся увеличить, но размер уже меньше минимального (странная ситуация), ничего не делаем
+                else // Если пытаемся увеличить, но размер уже меньше минимального ничего не делаем
                 {
-                    // Или можно тоже установить минимальный размер? Зависит от желаемого поведения. Пока просто выходим.
                     return;
                 }
             }
@@ -314,8 +309,8 @@ namespace OOP4
         public int LineWidth { get; set; } // Толщина линии
 
         public LineSegment(Point start, Point end, Color color, int lineWidth = 2)
-            : base(new Point(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y)), // Position - верхний левый угол bounding box
-                   new Size(Math.Abs(start.X - end.X), Math.Abs(start.Y - end.Y)), // Size - размеры bounding box
+            : base(new Point(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y)), // Position верхний левый угол bounding box
+                   new Size(Math.Abs(start.X - end.X), Math.Abs(start.Y - end.Y)), // Size размеры выделения
                    color)
         {
             StartPoint = start;
@@ -348,7 +343,7 @@ namespace OOP4
             {
                 g.DrawLine(pen, StartPoint, EndPoint);
             }
-            DrawSelection(g); // Рамку рисуем вокруг bounding box
+            DrawSelection(g); // Рамку рисуем вокруг выделения
         }
 
         // GetBounds нужно переопределять, чтобы вызвать UpdateBoundsFromPoints перед возвратом базового значения
@@ -368,7 +363,7 @@ namespace OOP4
             UpdateBoundsFromPoints(); // Обновляем Position и Size
         }
 
-        // Изменение размера отрезка (длины)
+        // Изменение размера отрезка
         public override void Resize(int dw, int dh)
         {
             // Используем dw как изменение длины (т.к. +/- дают одинаковые dw, dh)
@@ -393,7 +388,7 @@ namespace OOP4
                 newLength = minLength;
             }
 
-            // Предотвращаем деление на ноль, если текущая длина очень мала (линия - точка)
+            // Предотвращаем деление на ноль, если текущая длина очень мала
             if (currentLength < 0.01f)
             {
                 // Если линия была точкой, просто чуть сдвинем EndPoint при увеличении
@@ -401,7 +396,7 @@ namespace OOP4
                 {
                     EndPoint = new Point(StartPoint.X + (int)Math.Round(minLength), StartPoint.Y); // Например, вправо
                 }
-                // Иначе (уменьшение) - ничего не делаем
+                // Иначе ничего не делаем
                 UpdateBoundsFromPoints();
                 return; // Выходим
             }
@@ -413,14 +408,14 @@ namespace OOP4
             float newVecX = vecX * scale;
             float newVecY = vecY * scale;
 
-            // Находим новую конечную точку: StartPoint + newVector
+            // Находим новую конечную точку StartPoint + newVector
             int newEndX = StartPoint.X + (int)Math.Round(newVecX);
             int newEndY = StartPoint.Y + (int)Math.Round(newVecY);
 
             // Обновляем конечную точку
             EndPoint = new Point(newEndX, newEndY);
 
-            // Важно: обновляем Position и ShapeSize (ограничивающий прямоугольник)
+            // Обновляем Position и ShapeSize
             UpdateBoundsFromPoints();
         }
     }
