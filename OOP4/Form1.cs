@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D; // Для SmoothingMode
 using System.Windows.Forms;
 
-namespace OOP4 // Убедись, что пространство имен твое
+namespace OOP4
 {
     public partial class Form1 : Form
     {
@@ -19,7 +19,7 @@ namespace OOP4 // Убедись, что пространство имен тв�
         private Point startPoint;
         private Point lastMousePosition;
 
-        // НОВОЕ ПОЛЕ для временной фигуры
+        // Для временной фигуры
         private Shape temporaryShape = null;
 
         // Для контроля границ
@@ -42,23 +42,23 @@ namespace OOP4 // Убедись, что пространство имен тв�
             // Инициализируем границы рабочей области
             UpdateDrawingAreaBounds();
 
-            // Подписываемся на события PictureBox
+            // Для событий PictureBox
             pictureBoxDrawingArea.Paint += PictureBoxDrawingArea_Paint;
             pictureBoxDrawingArea.MouseDown += PictureBoxDrawingArea_MouseDown;
             pictureBoxDrawingArea.MouseMove += PictureBoxDrawingArea_MouseMove;
             pictureBoxDrawingArea.MouseUp += PictureBoxDrawingArea_MouseUp;
 
-            // Подписываемся на событие изменения размера формы/пикчербокса
+            // Ждя событий изменения размера формы/пикчербокса
             pictureBoxDrawingArea.Resize += (s, e) => UpdateDrawingAreaBounds();
 
-            // Подписываемся на событие нажатия клавиш на форме
+            // Для событий нажатия клавиш на форме
             this.KeyDown += Form1_KeyDown;
         }
 
         // Обновление границ рабочей области
         private void UpdateDrawingAreaBounds()
         {
-            // Используем ClientRectangle PictureBox'а как границы
+            // Используем ClientRectangle PictureBox как границы
             drawingAreaBounds = pictureBoxDrawingArea.ClientRectangle;
             // Уменьшим на 1 пиксель, чтобы граница не перекрывалась
             if (drawingAreaBounds.Width > 0) drawingAreaBounds.Width -= 1;
@@ -70,7 +70,7 @@ namespace OOP4 // Убедись, что пространство имен тв�
 
         private void PictureBoxDrawingArea_Paint(object sender, PaintEventArgs e)
         {
-            // Включаем сглаживание
+            // Включаем сглаживание для более красивым фигур
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
             // Рисуем все фигуры из хранилища
@@ -80,13 +80,12 @@ namespace OOP4 // Убедись, что пространство имен тв�
             if (isDrawing && temporaryShape != null)
             {
                 temporaryShape.Draw(e.Graphics);
-                // Важно: не вызываем DrawSelection для временной фигуры
             }
         }
 
         private void PictureBoxDrawingArea_MouseDown(object sender, MouseEventArgs e)
         {
-            // Проверяем, был ли клик левой кнопкой
+            // Проверяем был ли клик левой кнопкой
             if (e.Button != MouseButtons.Left) return;
 
             startPoint = e.Location;
@@ -111,10 +110,10 @@ namespace OOP4 // Убедись, что пространство имен тв�
                         DeselectAllShapes();
                         clickedShape.IsSelected = true;
                     }
-                    // Если кликнули по уже выделенной без Ctrl - ничего не меняем
+                    // Если кликнули по уже выделенной без Ctrl ничего не меняем
                 }
                 UpdateSelectedShapesList();
-                if (clickedShape.IsSelected) // Начинаем тащить, только если фигура выделена
+                if (clickedShape.IsSelected) // Двигаем только если фигура выделена
                 {
                     isDragging = true;
                 }
@@ -132,7 +131,6 @@ namespace OOP4 // Убедись, что пространство имен тв�
 
             pictureBoxDrawingArea.Invalidate(); // Запрос на перерисовку
         }
-
         private void PictureBoxDrawingArea_MouseMove(object sender, MouseEventArgs e)
         {
             // Двигаем выделенные фигуры
@@ -169,12 +167,11 @@ namespace OOP4 // Убедись, что пространство имен тв�
                 lastMousePosition = e.Location;
                 // Создаем или обновляем временную фигуру
                 // Используем новый вспомогательный метод
-                temporaryShape = CreateShapeObject(startPoint, lastMousePosition, false); // false = не добавлять в хранилище
+                temporaryShape = CreateShapeObject(startPoint, lastMousePosition, false); // false не добавлять в хранилище
 
                 pictureBoxDrawingArea.Invalidate(); // Запрос на перерисовку для отображения temporaryShape
             }
         }
-
         private void PictureBoxDrawingArea_MouseUp(object sender, MouseEventArgs e)
         {
             // Завершаем рисование новой фигуры
@@ -183,22 +180,21 @@ namespace OOP4 // Убедись, что пространство имен тв�
                 isDrawing = false;
                 Point endPoint = e.Location;
 
-                // Создаем ПОСТОЯННУЮ фигуру, если мышь сдвинулась достаточно
+                // Создаем постоянную фигуру если мышь сдвинулась достаточно
                 if (Math.Abs(endPoint.X - startPoint.X) > 3 || Math.Abs(endPoint.Y - startPoint.Y) > 3)
                 {
-                    // Используем основной метод CreateShape, который добавит фигуру в хранилище
+                    // Используем основной метод CreateShape который добавит фигуру в хранилище
                     CreateAndStoreShape(startPoint, endPoint);
                 }
 
                 temporaryShape = null; // Убираем временную фигуру
-                pictureBoxDrawingArea.Invalidate(); // Перерисовываем, чтобы убрать временную и показать постоянную
+                pictureBoxDrawingArea.Invalidate(); // Перерисовываем чтобы убрать временную и показать постоянную
             }
 
             // Завершаем перетаскивание
-            if (isDragging && e.Button == MouseButtons.Left) // Проверяем кнопку, чтобы правый клик не сбросил
+            if (isDragging && e.Button == MouseButtons.Left) // Проверяем кнопку чтобы правый клик не сбросил
             {
                 isDragging = false;
-                // Перерисовка не обязательна, т.к. фигуры уже на месте, но для надежности можно оставить
                 pictureBoxDrawingArea.Invalidate();
             }
         }
@@ -208,7 +204,7 @@ namespace OOP4 // Убедись, что пространство имен тв�
             Point topLeft = new Point(Math.Min(p1.X, p2.X), Math.Min(p1.Y, p2.Y));
             Size size = new Size(Math.Abs(p1.X - p2.X), Math.Abs(p1.Y - p2.Y));
 
-            // Минимальный размер для временной фигуры не так важен, но оставим
+            // Минимальный размер для временной фигуры
             if (size.Width < 1) size.Width = 1;
             if (size.Height < 1) size.Height = 1;
 
@@ -269,13 +265,12 @@ namespace OOP4 // Убедись, что пространство имен тв�
                 {
                     Console.WriteLine("New shape could not be created: Out of bounds.");
                     MessageBox.Show("Фигура выходит за границы рабочей области!", "Ошибка создания", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    // Перерисовка все равно нужна, чтобы убрать временную фигуру (вызовется из MouseUp)
+                    // Перерисовка чтобы убрать временную фигуру 
                 }
             }
         }
 
-
-        // Обработчик событий клавиатуры (без изменений)
+        // Обработчик событий клавиатуры
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (selectedShapes.Count == 0 && e.KeyCode != Keys.Delete) return; // Не обрабатываем +/- если нет выделения
@@ -315,7 +310,7 @@ namespace OOP4 // Убедись, что пространство имен тв�
 
             if (needsProcessing)
             {
-                // Применяем изменения (перемещение, ресайз или удаление)
+                // Применяем изменения
                 if (e.KeyCode == Keys.Delete)
                 {
                     ApplyDelete();
@@ -331,16 +326,14 @@ namespace OOP4 // Убедись, что пространство имен тв�
 
                 // Подавляем стандартную обработку клавиши, если мы ее использовали
                 e.Handled = true;
-                // SuppressKeyPress нужен, чтобы предотвратить системный звук "бип" для некоторых клавиш
+                // SuppressKeyPress для убирания системных звуков
                 e.SuppressKeyPress = (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus ||
                                       e.KeyCode == Keys.Subtract || e.KeyCode == Keys.OemMinus ||
                                       e.KeyCode == Keys.Delete || e.KeyCode == Keys.Up ||
                                       e.KeyCode == Keys.Down || e.KeyCode == Keys.Left || e.KeyCode == Keys.Right);
             }
         }
-
         // Вспомогательные методы для обработки клавиатуры
-
         private void ApplyDelete()
         {
             List<Shape> shapesToRemove = new List<Shape>(selectedShapes); // Копия
@@ -376,7 +369,7 @@ namespace OOP4 // Убедись, что пространство имен тв�
             }
             else
             {
-                Console.WriteLine("Movement cancelled: Shape would go out of bounds.");
+                //Console.WriteLine("Movement cancelled: Shape would go out of bounds.");
             }
         }
 
@@ -397,20 +390,18 @@ namespace OOP4 // Убедись, что пространство имен тв�
                     break;
                 }
 
-                // Упрощенная проверка на выход за границы при увеличении
+                // Проверка на выход за границы при увеличении
                 if (dw > 0 || dh > 0)
                 {
                     Rectangle potentialBounds = currentBounds;
-                    // Примерная оценка новых границ (может быть неточной для фигур с центром)
+                    // Примерная оценка новых границ
                     potentialBounds.Width = newWidth;
                     potentialBounds.Height = newHeight;
-                    if (shape is Circle || shape is Triangle) // Для фигур с центром, он может сместиться при ресайзе от края
+                    if (shape is Circle || shape is Triangle) // Для фигур с центром он может сместиться при ресайзе от края
                     {
-                        // Более сложная проверка нужна, пока упростим - проверим только правый/нижний край
                     }
 
-                    if (!drawingAreaBounds.Contains(potentialBounds) &&
-                       (potentialBounds.Right > drawingAreaBounds.Right || potentialBounds.Bottom > drawingAreaBounds.Bottom))
+                    if (!drawingAreaBounds.Contains(potentialBounds) && (potentialBounds.Right > drawingAreaBounds.Right || potentialBounds.Bottom > drawingAreaBounds.Bottom))
                     {
                         Console.WriteLine($"Resize cancelled: Shape {shape.GetType().Name} might go out of bounds.");
                         canResizeAll = false;
@@ -424,22 +415,19 @@ namespace OOP4 // Убедись, что пространство имен тв�
                 foreach (var shape in selectedShapes)
                 {
                     shape.Resize(dw, dh);
-                    // Пост-проверка (если Resize некорректно обработал границы)
+                    // Пост-проверка
                     if (!shape.IsWithinBounds(drawingAreaBounds))
                     {
-                        Console.WriteLine($"Warning: Shape {shape.GetType().Name} went out of bounds AFTER resize. Reverting is complex.");
                     }
                 }
                 pictureBoxDrawingArea.Invalidate();
             }
             else
             {
-                Console.WriteLine("Resize operation cancelled for the group.");
             }
         }
 
 
-        // Прочие Вспомогательные методы
 
         private void DeselectAllShapes()
         {
